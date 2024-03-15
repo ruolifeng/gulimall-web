@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-tree :data="menus" node-key="catId" show-checkbox :props="defaultProps" :expand-on-click-node="false"
-             :default-expanded-keys="openKeys" :draggable="true" :allow-drop="allowDrop">
+             :default-expanded-keys="openKeys" :draggable="true" :allow-drop="allowDrop" @node-drop="handleDrop">
       <span class="custom-tree-node" slot-scope="{ node, data }">
         <span>{{ data.name }}</span>
         <span>
@@ -41,10 +41,13 @@
   </div>
 </template>
 <script>
+import {handle} from 'nightwatch/lib/runner/cli/errorhandler'
+
 export default {
   name: 'category',
   data () {
     return {
+      updateSortNods: [],
       dialogTitle: '',
       dialogType: '',
       category: {
@@ -67,6 +70,7 @@ export default {
     }
   },
   methods: {
+    handle,
     emptyCategoryInfo () {
       this.dialogVisible = false
       this.category = {
@@ -179,8 +183,6 @@ export default {
     },
     allowDrop (draggingNode, dropNode, type) {
       const countNewLevel = this.getNewLevel(draggingNode, dropNode, type)
-      console.log(countNewLevel)
-      console.log(draggingNode, dropNode, type)
       return countNewLevel <= 3
     },
     getNewLevel (draggingNode, dropNode, type) {
@@ -199,9 +201,52 @@ export default {
     },
     getChildLevel (node) {
       if (node.childNodes.length === 0) {
-        return node.level; // 如果没有子节点，返回当前节点的层级
+        return node.level // 如果没有子节点，返回当前节点的层级
       } else {
-        return this.getChildLevel(node.childNodes[0]); // 递归调用获取子节点的层级
+        return this.getChildLevel(node.childNodes[0]) // 递归调用获取子节点的层级
+      }
+    },
+    handleDrop (draggingNode, dropNode, dropType, ev) {
+      console.log(draggingNode, dropNode, dropType, ev)
+      // 当前节点的最新父节点的id
+      let pCid = 0
+      let siblings = []
+      if (dropType === 'before' || dropType === 'after') {
+        pCid = dropNode.parent.data.catId === undefined ? 0 : dropNode.parent.data.catId
+      } else {
+        pCid = dropNode.data.catId
+      }
+      // 当前拖拽节点的最新顺序
+      if (dropType === 'inner') {
+        siblings = dropNode.childNodes
+      } else {
+        siblings = dropNode.parent.childNodes
+      }
+      for (let i = 0; i < siblings.length; i++) {
+        if (siblings[i].data.catId === draggingNode.data.catId) {
+          // 如果遍历的是当前正在拖拽的节点
+          let catLevel = draggingNode.level
+          if (siblings[i].level === draggingNode.level) {
+            // 当前节点层级发生变化
+            catLevel = siblings[i].level
+            // 修改子节点的层级
+            this.updateChildNodeLevel(siblings[i])
+          }
+          this.updateSortNods.push({catId: siblings[i].data.catId, sort: i, parentCid: pCid, catLevel: catLevel})
+        } else {
+          this.updateSortNods.push({catId: siblings[i].data.catId, sort: i})
+        }
+      }
+      // 当前拖拽节点的最新层级
+
+    },
+    updateChildNodeLevel (node) {
+      if (node.childNodes.length > 0) {
+        for (let i = 0; i < node.childNodes.length; i++) {
+          let cNode = node.childNodes[i].data
+          this.updateSortNods.push({catId: cNode.catId, catLevel: node.childNodes[i].level})
+          this.updateChildNodeLevel(node.childNodes[i])
+        }
       }
     }
   },
