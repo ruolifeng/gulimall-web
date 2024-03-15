@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-tree :data="menus" node-key="id" :props="defaultProps" @node-click show-checkbox :expand-on-click-node="false">
+    <el-tree :data="menus" node-key="catId" show-checkbox :props="defaultProps" :expand-on-click-node="false" :default-expanded-keys="openKeys">
       <span class="custom-tree-node" slot-scope="{ node, data }">
         <span>{{ data.name }}</span>
         <span>
@@ -20,6 +20,7 @@ export default {
   name: 'category',
   data () {
     return {
+      openKeys: [],
       menus: [],
       defaultProps: {
         children: 'children',
@@ -28,9 +29,6 @@ export default {
     }
   },
   methods: {
-    handleNodeClick (data) {
-      console.log(data)
-    },
     getMenus () {
       this.$http({
         url: this.$http.adornUrl('/product/category/list'),
@@ -43,7 +41,31 @@ export default {
       console.log(data)
     },
     remove (node, data) {
-      console.log(node, data)
+      this.$confirm(`此操作将永久删除【${node.data.name}】, 是否继续?', '提示`, {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        const ids = [node.data.catId]
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        })
+        this.$http({
+          url: this.$http.adornUrl('/product/category/delete'),
+          method: 'post',
+          data: this.$http.adornData(ids, false)
+        }).then(({data}) => {
+          // 刷新出新的菜单
+          this.getMenus()
+          this.openKeys = [node.parent.data.catId]
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
     }
   },
   created () {
