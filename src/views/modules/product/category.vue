@@ -1,6 +1,18 @@
 <template>
   <div>
-    <el-tree :data="menus" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
+    <el-tree :data="menus" node-key="id" :props="defaultProps" @node-click show-checkbox :expand-on-click-node="false">
+      <span class="custom-tree-node" slot-scope="{ node, data }">
+        <span>{{ data.name }}</span>
+        <span>
+          <el-button v-if="node.childNodes.length !== 0" type="text" size="mini" @click="() => append(data)">
+            添加
+          </el-button>
+          <el-button v-if="node.childNodes.length === 0" type="text" size="mini" @click="() => remove(node, data)">
+            删除
+          </el-button>
+        </span>
+      </span>
+    </el-tree>
   </div>
 </template>
 <script>
@@ -24,9 +36,14 @@ export default {
         url: this.$http.adornUrl('/product/category/list'),
         method: 'get'
       }).then(({data}) => {
-        console.log(data.data)
         this.menus = data.data
       })
+    },
+    append (data) {
+      console.log(data)
+    },
+    remove (node, data) {
+      console.log(node, data)
     }
   },
   created () {
