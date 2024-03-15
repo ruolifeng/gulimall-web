@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-tree :data="menus" node-key="catId" show-checkbox :props="defaultProps" :expand-on-click-node="false"
-             :default-expanded-keys="openKeys">
+             :default-expanded-keys="openKeys" :draggable="true" :allow-drop="allowDrop">
       <span class="custom-tree-node" slot-scope="{ node, data }">
         <span>{{ data.name }}</span>
         <span>
@@ -176,6 +176,33 @@ export default {
         })
         this.dialogVisible = false
       })
+    },
+    allowDrop (draggingNode, dropNode, type) {
+      const countNewLevel = this.getNewLevel(draggingNode, dropNode, type)
+      console.log(countNewLevel)
+      console.log(draggingNode, dropNode, type)
+      return countNewLevel <= 3
+    },
+    getNewLevel (draggingNode, dropNode, type) {
+      if (type === 'inner') {
+        if (draggingNode.parent.data.catId === dropNode.parent.data.catId) return this.getChildLevel(draggingNode) * 1 + 1
+        return (this.getChildLevel(draggingNode) + this.getChildLevel(dropNode)) * 1 + 1
+      }
+      if (type === 'next') {
+        if (draggingNode.parent.data.catId === dropNode.parent.data.catId) return this.getChildLevel(draggingNode)
+        return this.getChildLevel(draggingNode) + this.getChildLevel(dropNode)
+      }
+      if (type === 'prev') {
+        if (draggingNode.parent.data.catId === dropNode.parent.data.catId) return this.getChildLevel(draggingNode)
+        return this.getChildLevel(draggingNode) + this.getChildLevel(dropNode)
+      }
+    },
+    getChildLevel (node) {
+      if (node.childNodes.length === 0) {
+        return node.level; // 如果没有子节点，返回当前节点的层级
+      } else {
+        return this.getChildLevel(node.childNodes[0]); // 递归调用获取子节点的层级
+      }
     }
   },
   created () {
