@@ -115,6 +115,7 @@ export default {
           method: 'post',
           data: this.$http.adornData(data, false)
         }).then(({data}) => {
+          this.dialogVisible = false
           // 刷新出新的菜单
           this.getMenus()
           this.openKeys = [this.category.parentCid]
@@ -144,6 +145,7 @@ export default {
           type: 'info',
           message: '已取消添加'
         })
+        this.dialogVisible = false
       })
     }
   },
