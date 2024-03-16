@@ -73,6 +73,7 @@ export default {
     handle,
     emptyCategoryInfo () {
       this.dialogVisible = false
+      this.updateSortNods= []
       this.category = {
         catId: null,
         name: '',
@@ -237,8 +238,21 @@ export default {
           this.updateSortNods.push({catId: siblings[i].data.catId, sort: i})
         }
       }
-      // 当前拖拽节点的最新层级
-
+      // 当前拖拽节点的最新层级发送请求给后端更新数据
+      this.$http({
+        url: this.$http.adornUrl(`/product/category/update/sort`),
+        method: 'post',
+        data: this.$http.adornData(this.updateSortNods, false)
+      }).then(({data}) => {
+        this.$message({
+          type: 'success',
+          message: '菜单顺序修改成功'
+        })
+        // 刷新出新的菜单
+        this.getMenus()
+        this.openKeys = [pCid]
+        this.emptyCategoryInfo()
+      })
     },
     updateChildNodeLevel (node) {
       if (node.childNodes.length > 0) {
