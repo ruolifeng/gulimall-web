@@ -1,7 +1,10 @@
 <template>
   <div>
+    <el-switch v-model="isDrag" active-text="开启拖拽" inactive-text="关闭拖拽"></el-switch>
+    <el-button v-if="isDrag" type="primary" @click="batchSave">批量保存</el-button>
+    <el-button type="danger" @click="batchDelete">批量删除</el-button>
     <el-tree :data="menus" node-key="catId" show-checkbox :props="defaultProps" :expand-on-click-node="false"
-             :default-expanded-keys="openKeys" :draggable="true" :allow-drop="allowDrop" @node-drop="handleDrop">
+             :default-expanded-keys="openKeys" :draggable="isDrag" :allow-drop="allowDrop" @node-drop="handleDrop" ref="treeMenus">
       <span class="custom-tree-node" slot-scope="{ node, data }">
         <span>{{ data.name }}</span>
         <span>
@@ -47,6 +50,8 @@ export default {
   name: 'category',
   data () {
     return {
+      pCid: 0,
+      isDrag: false,
       updateSortNods: [],
       dialogTitle: '',
       dialogType: '',
@@ -72,8 +77,9 @@ export default {
   methods: {
     handle,
     emptyCategoryInfo () {
+      this.pCid = 0
       this.dialogVisible = false
-      this.updateSortNods= []
+      this.updateSortNods = []
       this.category = {
         catId: null,
         name: '',
@@ -210,12 +216,11 @@ export default {
     handleDrop (draggingNode, dropNode, dropType, ev) {
       console.log(draggingNode, dropNode, dropType, ev)
       // 当前节点的最新父节点的id
-      let pCid = 0
       let siblings = []
       if (dropType === 'before' || dropType === 'after') {
-        pCid = dropNode.parent.data.catId === undefined ? 0 : dropNode.parent.data.catId
+        this.pCid = dropNode.parent.data.catId === undefined ? 0 : dropNode.parent.data.catId
       } else {
-        pCid = dropNode.data.catId
+        this.pCid = dropNode.data.catId
       }
       // 当前拖拽节点的最新顺序
       if (dropType === 'inner') {
@@ -233,11 +238,13 @@ export default {
             // 修改子节点的层级
             this.updateChildNodeLevel(siblings[i])
           }
-          this.updateSortNods.push({catId: siblings[i].data.catId, sort: i, parentCid: pCid, catLevel: catLevel})
+          this.updateSortNods.push({catId: siblings[i].data.catId, sort: i, parentCid: this.pCid, catLevel: catLevel})
         } else {
           this.updateSortNods.push({catId: siblings[i].data.catId, sort: i})
         }
       }
+    },
+    batchSave () {
       // 当前拖拽节点的最新层级发送请求给后端更新数据
       this.$http({
         url: this.$http.adornUrl(`/product/category/update/sort`),
@@ -250,8 +257,42 @@ export default {
         })
         // 刷新出新的菜单
         this.getMenus()
-        this.openKeys = [pCid]
+        this.openKeys = [this.pCid]
         this.emptyCategoryInfo()
+      })
+    },
+    // 批量删除
+    batchDelete () {
+      let catIds = []
+      const checkMenus = this.$refs.treeMenus.getCheckedNodes(false, false)
+      for (let i = 0; i<checkMenus.length; i++){
+        catIds.push(checkMenus[i].catId)
+      }
+      this.$confirm(`此操作将批量删除【所选数据】是否继续?', '提示`, {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$message({
+          type: 'success',
+          message: `批量删除成功`
+        })
+        this.$http({
+          url: this.$http.adornUrl(`/product/category/delete`),
+          method: 'post',
+          data: this.$http.adornData(catIds, false)
+        }).then(({data}) => {
+          this.dialogVisible = false
+          // 刷新出新的菜单
+          this.getMenus()
+          this.emptyCategoryInfo()
+        })
+      }).catch(() => {
+        this.emptyCategoryInfo()
+        this.$message({
+          type: 'info',
+          message: `已取消批量删除`
+        })
       })
     },
     updateChildNodeLevel (node) {
