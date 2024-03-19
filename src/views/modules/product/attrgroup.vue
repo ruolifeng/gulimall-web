@@ -76,11 +76,11 @@
                 layout="total, sizes, prev, pager, next, jumper"
               ></el-pagination>
               <!-- 弹窗, 新增 / 修改 -->
-              <addr-or-update v-if="addOrUpdateVisible" ref="addOrUpdate"
-                              @refreshDataList="getDataList"></addr-or-update>
+              <AddOrUpdate v-if="addOrUpdateVisible" ref="addOrUpdate"
+                              @refreshDataList="getDataList"></AddOrUpdate>
 
               <!-- 修改关联关系 -->
-              <relation-update v-if="relationVisible" ref="relationUpdate" @refreshData="getDataList"></relation-update>
+<!--              <relation-update v-if="relationVisible" ref="relationUpdate" @refreshData="getDataList"></relation-update>-->
             </div>
           </el-col>
         </el-row>
