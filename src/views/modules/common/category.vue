@@ -29,7 +29,6 @@ export default {
       })
     },
     nodeClick (data, node, co) {
-      console.log(data, node, co)
       //   向父组件发送事件
       //   传递的参数：事件名，任意多的东西（当事件触发的时候都会被传递）
       this.$emit('tree-node-event', data, node, co)

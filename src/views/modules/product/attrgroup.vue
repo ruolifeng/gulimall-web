@@ -129,7 +129,6 @@ export default {
     },
     // 感知树节点被点击
     treenodeclick (data, node, co) {
-      console.log('父组件感知到子组件被调用', node)
       if (node.level == 3) {
         this.catId = data.catId
         this.getDataList() // 重新查询
@@ -152,8 +151,8 @@ export default {
         })
       }).then(({data}) => {
         if (data && data.code === 0) {
-          this.dataList = data.page.list
-          this.totalPage = data.page.totalCount
+          this.dataList = data.data.data
+          this.totalPage = data.totalCount
         } else {
           this.dataList = []
           this.totalPage = 0
