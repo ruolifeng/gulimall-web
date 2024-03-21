@@ -168,7 +168,6 @@ export default {
           brandId: this.brandId
         })
       }).then(({ data }) => {
-        console.log(data)
         this.cateRelationTableData = data.data
       })
     },

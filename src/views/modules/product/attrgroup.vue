@@ -80,7 +80,7 @@
                               @refreshDataList="getDataList"></AddOrUpdate>
 
               <!-- 修改关联关系 -->
-<!--              <relation-update v-if="relationVisible" ref="relationUpdate" @refreshData="getDataList"></relation-update>-->
+              <AttrGroupRelation v-if="relationVisible" ref="relationUpdate" @refreshData="getDataList"></AttrGroupRelation>
             </div>
           </el-col>
         </el-row>
@@ -96,10 +96,11 @@
  */
 import Category from '../common/category.vue'
 import AddOrUpdate from './attrgroup-add-or-update'
+import AttrGroupRelation from './attr-group-relation.vue'
 
 export default {
   name: 'attrgroup',
-  components: {Category, AddOrUpdate},
+  components: {AttrGroupRelation, Category, AddOrUpdate},
   data () {
     return {
       catId: 0,
