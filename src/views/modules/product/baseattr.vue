@@ -72,7 +72,7 @@
               <i class="el-icon-error" v-else></i>
             </template>
           </el-table-column>
-          <el-table-column prop="catelogId" header-align="center" align="center" label="所属分类"></el-table-column>
+          <el-table-column prop="catelogName" header-align="center" align="center" label="所属分类"></el-table-column>
           <el-table-column
             v-if="attrtype == 1"
             prop="groupName"
@@ -167,7 +167,7 @@ export default {
     },
     // 获取数据列表
     getDataList () {
-      console.log("获取数据")
+      console.log('获取数据')
       this.dataListLoading = true
       let type = this.attrtype == 0 ? 'sale' : 'base'
       this.$http({
@@ -181,7 +181,7 @@ export default {
       }).then(({data}) => {
         if (data && data.code === 0) {
           console.log(data)
-          this.dataList = data.data
+          this.dataList = data.data.data
           this.totalPage = data.data.totalCount
         } else {
           this.dataList = []
