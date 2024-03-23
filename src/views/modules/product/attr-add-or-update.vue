@@ -226,7 +226,7 @@ export default {
               this.dataForm.showDesc = data.data.showDesc
               // attrGroupId
               // catelogPath
-              this.catelogPath = data.data.catelogPath
+              this.catelogPath = data.data.catalogPath
               this.$nextTick(() => {
                 this.dataForm.attrGroupId = data.data.attrGroupId
               })
