@@ -195,6 +195,7 @@ export default {
         method: 'get',
         params: this.$http.adornParams({})
       }).then(({data}) => {
+        console.log(data)
         this.relationAttrs = data.data
       })
     },
@@ -216,9 +217,10 @@ export default {
           key: this.dataForm.key
         })
       }).then(({data}) => {
+        console.log(data)
         if (data && data.code === 0) {
-          this.dataList = data.page.list
-          this.totalPage = data.page.totalCount
+          this.dataList = data.data.data
+          this.totalPage = data.data.totalCount
         } else {
           this.dataList = []
           this.totalPage = 0
